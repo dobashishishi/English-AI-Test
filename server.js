@@ -3,12 +3,14 @@ import fs from "fs";
 import csv from "csv-parser";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5173;
 
+app.use(cors());          // ここでCORSを有効化
 app.use(express.json());
 
 let wordList = [];
