@@ -14,6 +14,9 @@ let questions = [];
 let currentIndex = 0;
 let currentQ = null;
 
+// RenderのAPIベースURL（ここを書き換えてください）
+const API_BASE_URL = "https://english-ai-test.onrender.com";
+
 startBtn.onclick = async () => {
   const startNum = parseInt(document.getElementById("startNum").value);
   const endNum = parseInt(document.getElementById("endNum").value);
@@ -21,7 +24,7 @@ startBtn.onclick = async () => {
 
   try {
     const res = await fetch(
-      `${window.location.origin}/get-questions?rangeStart=${startNum}&rangeEnd=${endNum}&count=${count}`
+      `${API_BASE_URL}/get-questions?rangeStart=${startNum}&rangeEnd=${endNum}&count=${count}`
     );
     questions = await res.json();
 
@@ -57,7 +60,7 @@ submitBtn.onclick = async () => {
   if (!userAnswer) return alert("答えを入力してください");
 
   try {
-    const res = await fetch(`${window.location.origin}/check`, {
+    const res = await fetch(`${API_BASE_URL}/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -69,9 +72,9 @@ submitBtn.onclick = async () => {
     const data = await res.json();
 
     if (data.correct) {
-      resultEl.textContent = `⭕ 正解！（正解: ${data.correctMeaning}, 類似度: ${Math.round(data.score * 100)}%）`;
+      resultEl.textContent = "⭕ 正解！";
     } else {
-      resultEl.textContent = `❌ 不正解（正解: ${data.correctMeaning}, 類似度: ${Math.round(data.score * 100)}%）`;
+      resultEl.textContent = `❌ 不正解（正解: ${data.correctMeaning}）`;
     }
 
     questionArea.style.display = "none";
