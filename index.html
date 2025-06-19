@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>英単語意味判定アプリ</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .question-area, .result-area { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>英単語意味判定アプリ</h1>
+
+  <div>
+    <label>開始番号: <input type="number" id="startNum" value="1" /></label>
+    <label>終了番号: <input type="number" id="endNum" value="100" /></label>
+    <label>出題数: <input type="number" id="count" value="10" /></label>
+    <button id="startBtn">テスト開始</button>
+  </div>
+
+  <div class="question-area" style="display: none;">
+    <p id="qNumber"></p>
+    <p><strong id="word"></strong></p>
+    <input type="text" id="answerInput" placeholder="日本語で意味を入力" />
+    <button id="submitBtn">答える</button>
+  </div>
+
+  <div class="result-area" style="display: none;">
+    <p id="result"></p>
+    <button id="nextBtn">次の問題</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

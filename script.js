@@ -1,0 +1,93 @@
+const startBtn = document.getElementById("startBtn");
+const submitBtn = document.getElementById("submitBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+const questionArea = document.querySelector(".question-area");
+const resultArea = document.querySelector(".result-area");
+
+const qNumber = document.getElementById("qNumber");
+const wordEl = document.getElementById("word");
+const answerInput = document.getElementById("answerInput");
+const resultEl = document.getElementById("result");
+
+let questions = [];
+let currentIndex = 0;
+let currentQ = null;
+
+startBtn.onclick = async () => {
+  const startNum = parseInt(document.getElementById("startNum").value);
+  const endNum = parseInt(document.getElementById("endNum").value);
+  const count = parseInt(document.getElementById("count").value);
+
+  try {
+    const res = await fetch(
+      `/get-questions?rangeStart=${startNum}&rangeEnd=${endNum}&count=${count}`
+    );
+    questions = await res.json();
+
+    currentIndex = 0;
+    showQuestion();
+  } catch (err) {
+    alert("問題の取得に失敗しました");
+    console.error(err);
+  }
+};
+
+function showQuestion() {
+  if (currentIndex >= questions.length) {
+    alert("テスト終了！お疲れ様でした");
+    questionArea.style.display = "none";
+    resultArea.style.display = "none";
+    return;
+  }
+
+  currentQ = questions[currentIndex];
+  qNumber.textContent = `問題 ${currentIndex + 1} / ${questions.length}`;
+  wordEl.textContent = currentQ.word;
+  answerInput.value = "";
+  resultEl.textContent = "";
+
+  questionArea.style.display = "block";
+  resultArea.style.display = "none";
+}
+
+submitBtn.onclick = async () => {
+  const userAnswer = answerInput.value.trim();
+
+  if (!userAnswer) return alert("答えを入力してください");
+
+  try {
+    const res = await fetch("/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userAnswer,
+        correctMeaning: currentQ.meaning,
+      }),
+    });
+
+    const data = await res.json();
+
+    // 意味が配列ならスラッシュ区切りで連結
+    const displayMeaning = Array.isArray(data.correctMeaning)
+      ? data.correctMeaning.join(" / ")
+      : data.correctMeaning;
+
+    if (data.correct === true || data.correct === "true") {
+      resultEl.textContent = `⭕ 正解！ 正しい意味: ${displayMeaning} 類似度スコア: ${data.score.toFixed(3)}`;
+    } else {
+      resultEl.textContent = `❌ 不正解（正解: ${displayMeaning}） 類似度スコア: ${data.score.toFixed(3)}`;
+    }
+
+    questionArea.style.display = "none";
+    resultArea.style.display = "block";
+  } catch (err) {
+    resultEl.textContent = "エラーが発生しました";
+    console.error(err);
+  }
+};
+
+nextBtn.onclick = () => {
+  currentIndex++;
+  showQuestion();
+};
