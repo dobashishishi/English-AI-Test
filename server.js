@@ -10,7 +10,6 @@ const app = express();
 const PORT = process.env.PORT || 5173;
 
 app.use(express.json());
-app.use(express.static("."));
 
 let wordList = [];
 
@@ -34,6 +33,7 @@ function loadCSV() {
 
 loadCSV();
 
+// 出題API
 app.get("/get-questions", (req, res) => {
   const start = parseInt(req.query.rangeStart);
   const end = parseInt(req.query.rangeEnd);
@@ -49,6 +49,7 @@ app.get("/get-questions", (req, res) => {
   res.json(shuffled);
 });
 
+// 意味類似度チェックAPI
 app.post("/check", async (req, res) => {
   const { userAnswer, correctMeaning } = req.body;
 
@@ -88,6 +89,9 @@ app.post("/check", async (req, res) => {
     res.status(500).json({ error: "類似度判定エラー" });
   }
 });
+
+// 静的ファイル提供は必ず最後に
+app.use(express.static("."));
 
 app.listen(PORT, () => {
   console.log(`✅ サーバー起動中: http://localhost:${PORT}`);
