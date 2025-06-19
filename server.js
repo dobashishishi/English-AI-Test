@@ -3,17 +3,23 @@ import fs from "fs";
 import csv from "csv-parser";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5173;
 
+// CORS設定：GitHub Pagesからのアクセスを許可
+app.use(cors({
+  origin: "https://dobashishishi.github.io"
+}));
+
 app.use(express.json());
 
+// 単語リストの読み込み
 let wordList = [];
 
-// CSV読み込み時に意味を配列に変換
 function loadCSV() {
   wordList = [];
   fs.createReadStream("wordlist.csv")
@@ -48,7 +54,7 @@ app.get("/get-questions", (req, res) => {
   res.json(shuffled);
 });
 
-// 意味類似度チェックAPI
+// 類似度チェックAPI
 app.post("/check", async (req, res) => {
   const { userAnswer, correctMeaning } = req.body;
 
@@ -89,8 +95,8 @@ app.post("/check", async (req, res) => {
   }
 });
 
-// 静的ファイルを提供（index.htmlやscript.jsがあるフォルダ）
-app.use(express.static("."));
+// 静的ファイル提供（ローカル開発用など）※必要に応じて
+// app.use(express.static("public"));
 
 app.listen(PORT, () => {
   console.log(`✅ サーバー起動中: http://localhost:${PORT}`);
