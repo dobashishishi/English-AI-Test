@@ -10,16 +10,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5173;
 
-// CORS設定：GitHub Pagesからのアクセスを許可
-app.use(cors({
-  origin: "https://dobashishishi.github.io"
-}));
-
+app.use(cors()); // 外部からのアクセスを許可
 app.use(express.json());
 
-// 単語リストの読み込み
 let wordList = [];
 
+// CSV読み込み（意味を配列に変換）
 function loadCSV() {
   wordList = [];
   fs.createReadStream("wordlist.csv")
@@ -28,7 +24,10 @@ function loadCSV() {
       wordList.push({
         id: parseInt(data.id),
         word: data.word,
-        meaning: data.meaning.trim().split(/[、,;；]/).map(s => s.trim()),
+        meaning: data.meaning
+          .trim()
+          .split(/[、,;；]/) // 全角/半角カンマやセミコロンで分割
+          .map((s) => s.trim()),
       });
     })
     .on("end", () => {
@@ -38,7 +37,7 @@ function loadCSV() {
 
 loadCSV();
 
-// 出題API
+// 問題取得API
 app.get("/get-questions", (req, res) => {
   const start = parseInt(req.query.rangeStart);
   const end = parseInt(req.query.rangeEnd);
@@ -69,7 +68,9 @@ app.post("/check", async (req, res) => {
         },
         body: JSON.stringify({
           inputs: {
-            source_sentence: Array.isArray(correctMeaning) ? correctMeaning[0] : correctMeaning,
+            source_sentence: Array.isArray(correctMeaning)
+              ? correctMeaning[0]
+              : correctMeaning,
             sentences: [userAnswer],
           },
         }),
@@ -83,21 +84,8 @@ app.post("/check", async (req, res) => {
     }
 
     const result = await response.json();
-    console.log("Hugging Face APIの結果:", result);
-
     const score = result[0] || 0;
     const isCorrect = score >= 0.7;
 
     res.json({ correct: isCorrect, score, correctMeaning });
-  } catch (error) {
-    console.error("Error contacting Hugging Face API:", error);
-    res.status(500).json({ error: "類似度判定エラー" });
-  }
-});
-
-// 静的ファイル提供（ローカル開発用など）※必要に応じて
-// app.use(express.static("public"));
-
-app.listen(PORT, () => {
-  console.log(`✅ サーバー起動中: http://localhost:${PORT}`);
-});
+  } catch
