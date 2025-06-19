@@ -3,14 +3,12 @@ import fs from "fs";
 import csv from "csv-parser";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
-import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5173;
 
-app.use(cors());          // ここでCORSを有効化
 app.use(express.json());
 
 let wordList = [];
@@ -24,7 +22,6 @@ function loadCSV() {
       wordList.push({
         id: parseInt(data.id),
         word: data.word,
-        // 読点、カンマ、セミコロン、全角半角対応で分割し配列化
         meaning: data.meaning.trim().split(/[、,;；]/).map(s => s.trim()),
       });
     })
@@ -92,7 +89,7 @@ app.post("/check", async (req, res) => {
   }
 });
 
-// 静的ファイル提供は必ず最後に
+// 静的ファイルを提供（index.htmlやscript.jsがあるフォルダ）
 app.use(express.static("."));
 
 app.listen(PORT, () => {
