@@ -10,12 +10,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5173;
 
-app.use(cors()); // 外部からのアクセスを許可
+app.use(cors()); // 外部アクセス許可
 app.use(express.json());
 
 let wordList = [];
 
-// CSV読み込み（意味を配列に変換）
+// CSV読み込み（意味を配列に分割）
 function loadCSV() {
   wordList = [];
   fs.createReadStream("wordlist.csv")
@@ -26,7 +26,7 @@ function loadCSV() {
         word: data.word,
         meaning: data.meaning
           .trim()
-          .split(/[、,;；]/) // 全角/半角カンマやセミコロンで分割
+          .split(/[、,;；]/)
           .map((s) => s.trim()),
       });
     })
@@ -37,7 +37,7 @@ function loadCSV() {
 
 loadCSV();
 
-// 問題取得API
+// 問題出題API
 app.get("/get-questions", (req, res) => {
   const start = parseInt(req.query.rangeStart);
   const end = parseInt(req.query.rangeEnd);
@@ -88,4 +88,16 @@ app.post("/check", async (req, res) => {
     const isCorrect = score >= 0.7;
 
     res.json({ correct: isCorrect, score, correctMeaning });
-  } catch
+  } catch (error) {
+    console.error("Error contacting Hugging Face API:", error);
+    res.status(500).json({ error: "類似度判定エラー" });
+  }
+});
+
+// 静的ファイル提供（publicフォルダがない場合でもルートから）
+app.use(express.static("."));
+
+// サーバー起動
+app.listen(PORT, () => {
+  console.log(`✅ サーバー起動中: http://localhost:${PORT}`);
+});
