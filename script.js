@@ -21,7 +21,7 @@ startBtn.onclick = async () => {
 
   try {
     const res = await fetch(
-      `/get-questions?rangeStart=${startNum}&rangeEnd=${endNum}&count=${count}`
+      `${window.location.origin}/get-questions?rangeStart=${startNum}&rangeEnd=${endNum}&count=${count}`
     );
     questions = await res.json();
 
@@ -57,7 +57,7 @@ submitBtn.onclick = async () => {
   if (!userAnswer) return alert("答えを入力してください");
 
   try {
-    const res = await fetch("/check", {
+    const res = await fetch(`${window.location.origin}/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -68,15 +68,10 @@ submitBtn.onclick = async () => {
 
     const data = await res.json();
 
-    // 意味が配列ならスラッシュ区切りで連結
-    const displayMeaning = Array.isArray(data.correctMeaning)
-      ? data.correctMeaning.join(" / ")
-      : data.correctMeaning;
-
-    if (data.correct === true || data.correct === "true") {
-      resultEl.textContent = `⭕ 正解！ 正しい意味: ${displayMeaning} 類似度スコア: ${data.score.toFixed(3)}`;
+    if (data.correct) {
+      resultEl.textContent = `⭕ 正解！（正解: ${data.correctMeaning}, 類似度: ${Math.round(data.score * 100)}%）`;
     } else {
-      resultEl.textContent = `❌ 不正解（正解: ${displayMeaning}） 類似度スコア: ${data.score.toFixed(3)}`;
+      resultEl.textContent = `❌ 不正解（正解: ${data.correctMeaning}, 類似度: ${Math.round(data.score * 100)}%）`;
     }
 
     questionArea.style.display = "none";
